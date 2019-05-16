@@ -1,0 +1,78 @@
+﻿<div class="jumbotron">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="input-username">Username:</label>
+                <input type="text" id="input-username" placeholder="User Name" class="form-control"/>
+            </div>
+            <div class="form-group">
+                <label for="input-password">Password:</label>
+                <input type="password" id="input-password" placeholder="Password" class="form-control"/>
+            </div>
+            <a href="#" id="button-submit" class="btn btn-success" type="button">Submit</a>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="input-token">Access Token:</label>
+                <input type="text" id="input-token" placeholder="Bearer Token" class="form-control" />
+            </div>
+            <a href="#" id="button-copy-token" class="btn btn-info" type="button">Copy Token</a>
+            <a href="#" id="button-claims" class="btn btn-success" type="button">Get Claims</a>
+        </div>
+    </div>
+        
+    <div class="row">
+        <pre id="result" style="margin-top: 20px; min-height: 200px"></pre>
+    </div>
+</div>
+<script>
+    $(document).ready(() => {
+        $("#button-submit").click(() => {
+
+            var username = $("#input-username").val();
+            var password = $("#input-password").val();
+
+            var params = "?username=" + username + "&password=" + password;
+            var url = "/api/Federation/Authenticate" + params;
+            
+            $.ajax({
+                url: url,
+                type: "GET",
+                dataType: 'json',
+                success: data => { $("#result").html(data) },
+                error: error => { $("#result").html(error.responseJSON.Message) }
+            });
+        });
+
+        $("#button-copy-token").click(() => {
+            var token = $("#result").html();
+
+            if (!token || !token.startsWith("ey")) {
+                $("#result").html("missing valid token");
+            } else {
+                $("#input-token").val("bearer " + token);
+            }
+        });
+
+        $("#button-claims").click(() => {
+            var token = $("#input-token").val();
+
+            var url = "/api/Federation/GetClaims";
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                headers: {
+                    "Authorization": token
+                },
+                dataType: 'json',
+                success: data => { $("#result").html(JSON.stringify(data, null, 4)) },
+                error: error => { $("#result").html(error.responseJSON.Message) }
+            });
+
+        });
+    });
+</script>
+
+    
+
